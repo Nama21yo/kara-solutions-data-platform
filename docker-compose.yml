@@ -8,11 +8,13 @@ services:
     volumes:
       - ./data:/app/data
       - ./scripts:/app/scripts
+      - ./dbt_project:/app/dbt_project
       - ./.env:/app/.env
     depends_on:
       - postgres
     environment:
       - PYTHONPATH=/app
+    command: tail -f /dev/null # Keep container running for dbt commands
 
   postgres:
     image: postgres:15

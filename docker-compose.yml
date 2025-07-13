@@ -25,5 +25,16 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./dbt_project:/app/dbt_project
+      - ./.env:/app/.env
+    depends_on:
+      - postgres
+    command: ["dbt", "run", "--project-dir", "/app/dbt_project"]
+
 volumes:
   postgres_data:

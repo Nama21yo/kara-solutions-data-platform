@@ -1,0 +1,89 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: telegram_messages
+        description: Raw Telegram messages loaded from JSON files.
+
+models:
+  - name: stg_telegram_messages
+    description: Staging model for cleaned Telegram messages.
+    columns:
+      - name: raw_id
+        description: Primary key from raw data.
+        tests:
+          - unique
+          - not_null
+      - name: channel_name
+        description: Name of the Telegram channel.
+        tests:
+          - not_null
+      - name: message_id
+        description: Unique message ID from Telegram.
+        tests:
+          - not_null
+      - name: message_timestamp
+        description: Timestamp of the message.
+        tests:
+          - not_null
+
+  - name: dim_channels
+    description: Dimension table for Telegram channels.
+    columns:
+      - name: channel_id
+        description: Unique identifier for each channel.
+        tests:
+          - unique
+          - not_null
+      - name: channel_name
+        description: Name of the Telegram channel.
+        tests:
+          - not_null
+      - name: total_messages
+        description: Total number of messages per channel.
+
+  - name: dim_dates
+    description: Dimension table for date-based analysis.
+    columns:
+      - name: date_id
+        description: Unique identifier for each date.
+        tests:
+          - unique
+          - not_null
+      - name: date
+        description: Calendar date.
+        tests:
+          - not_null
+
+  - name: fct_messages
+    description: Fact table for Telegram messages with analytics metrics.
+    columns:
+      - name: message_key
+        description: Unique key combining message_id and channel_name.
+        tests:
+          - unique
+          - not_null
+      - name: channel_id
+        description: Foreign key to dim_channels.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_id
+      - name: date_id
+        description: Foreign key to dim_dates.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_dates')
+              field: date_id
+      - name: has_image
+        description: Indicates if the message includes an image.
+      - name: image_path
+        description: File path to the image, if present.
+        tests:
+          - accepted_values:
+              values: [null, ""]
+              when: "{{ ref('fct_messages').has_image == false }}"

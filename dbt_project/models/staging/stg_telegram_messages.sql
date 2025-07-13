@@ -1,13 +1,18 @@
-{{ config(materialized='view', schema='staging') }}
+{{ config(
+    materialized='view',
+    schema='staging',
+    alias='telegram_messages'
+) }}
 
 SELECT
-    id,
+    id AS raw_id,
     channel AS channel_name,
     message_id,
-    message_date::TIMESTAMP AS message_date,
+    CAST(message_date AS TIMESTAMP) AS message_timestamp,
     COALESCE(message_text, '') AS message_text,
     has_image,
     image_path,
     raw_data
-FROM raw.telegram_messages
-WHERE message_date IS NOT NULL
+FROM {{ source('raw', 'telegram_messages') }}
+WHERE message_id IS NOT NULL
+  AND message_date IS NOT NULL

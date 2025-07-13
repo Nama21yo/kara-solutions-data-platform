@@ -1,4 +1,4 @@
-default:
+medical_data_platform:
   target: dev
   outputs:
     dev:
@@ -9,4 +9,3 @@ default:
       port: { { env_var('POSTGRES_PORT') | as_number } }
       dbname: { { env_var('POSTGRES_DB') } }
       schema: public
-      threads: 4

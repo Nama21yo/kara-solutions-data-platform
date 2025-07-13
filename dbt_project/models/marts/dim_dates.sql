@@ -1,10 +1,14 @@
-{{ config(materialized='table', schema='marts', unique_key='date_id') }}
+{{ config(
+    materialized='table',
+    schema='marts',
+    unique_key='date_id'
+) }}
 
 WITH date_spine AS (
   {{ dbt_utils.date_spine(
       datepart="day",
-      start_date="CAST('2023-01-01' AS DATE)",
-      end_date="CAST(CURRENT_DATE AS DATE)"
+      start_date="CAST('{{ var('start_date') }}' AS DATE)",
+      end_date="CAST('{{ var('end_date') }}' AS DATE)"
   ) }}
 )
 SELECT
